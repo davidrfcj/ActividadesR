@@ -1,0 +1,346 @@
+---
+title: "Carrera La Luz 2022"
+subtile: "Actividad 1 - Métodos y Simulación Estadística"
+output: 
+  flexdashboard::flex_dashboard:
+    theme: cerulean
+    #   bg: "#FFFFFF"
+    #   fg: "#034A94" 
+    #   primary: "#034A94" 
+    #   base_font:
+    #     google: Sen
+    #   code_font:
+    #     google: JetBrains Mono
+    # orientation: columns
+    # vertical_layout: fill
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+# Install thematic and un-comment for themed static plots (i.e., ggplot2)
+# thematic::thematic_rmd()
+library(ggplot2)
+library(paqueteMET)
+
+data("CarreraLuz22")
+
+  
+Theme2 = theme(
+  axis.title.x = element_text(size = 8),
+  axis.text.x = element_text(size = 8),
+  axis.title.y = element_text(size = 8),
+  # axis.text.y = element_blank(),
+  axis.text = element_text( size = 8),
+  legend.title = element_text(size = 8),
+  legend.text = element_text(size = 8),  
+  strip.text = element_text(size=8),
+  title =element_text(size=8, face='bold')
+)# tamaño letra por grupos
+
+# subsets-----------------------------------------------------------------------
+CarreraLuz22$sex[CarreraLuz22$sex == "M"]="Hombre"
+CarreraLuz22$sex[CarreraLuz22$sex == "F"]="Mujer"
+#-------------------------------------------------------------------------------
+CarreraLuz22M = subset(CarreraLuz22, CarreraLuz22$sex=="Hombre")
+CarreraLuz22F = subset(CarreraLuz22, CarreraLuz22$sex=="Mujer")
+
+#-------------------------------------------------------------------------------
+CarreraLuz22_c1M = subset(CarreraLuz22M, CarreraLuz22M$categoria=="1. Juvenil")
+CarreraLuz22_c2M = subset(CarreraLuz22M, CarreraLuz22M$categoria=="2. Abierta")
+CarreraLuz22_c3M = subset(CarreraLuz22M, CarreraLuz22M$categoria=="3. Veteranos A")
+CarreraLuz22_c4M = subset(CarreraLuz22M, CarreraLuz22M$categoria=="4. Veteranos B")
+CarreraLuz22_c5M = subset(CarreraLuz22M, CarreraLuz22M$categoria=="5. Veteranos C")
+
+
+CarreraLuz22_c1F = subset(CarreraLuz22F, CarreraLuz22F$categoria=="1. Juvenil")
+CarreraLuz22_c2F = subset(CarreraLuz22F, CarreraLuz22F$categoria=="2. Abierta")
+CarreraLuz22_c3F = subset(CarreraLuz22F, CarreraLuz22F$categoria=="3. Veteranos A")
+CarreraLuz22_c4F = subset(CarreraLuz22F, CarreraLuz22F$categoria=="4. Veteranos B")
+CarreraLuz22_c5F = subset(CarreraLuz22F, CarreraLuz22F$categoria=="5. Veteranos C")
+#-------------------------------------------------------------------------------
+
+categoria= c("Juvenil","Abierta","Veteranos A", "Veteranos B","Veteranos C")
+sexo= c("Mujer","Hombre")
+t2 = aggregate(CarreraLuz22$timerun/60, by=list(CarreraLuz22$categoria,CarreraLuz22$sex), FUN= summary)
+t2=t2$x
+t2m=t2[1:5,] 
+row.names(t2m)=categoria
+t2h=t2[6:10,] 
+row.names(t2h)=categoria
+```
+
+# Hombres
+
+Column {data.width=300 .tabset} 
+---------------------------------
+
+### Hombres por categoria
+
+```{r}
+
+t1=table(CarreraLuz22M$categoria)
+pie(t1, col = rainbow(5))
+
+```
+
+### Hombres por edad
+
+```{r}
+
+t1=table(CarreraLuz22M$edad)
+# grafico<-ggplot(CarreraLuz22M,aes(x=edad))+geom_bar(fill='blue')
+# grafico
+barplot(t1, col = rainbow(5), xlab = "edad", ylab = "frecuencia")
+```
+
+Column {data.width=500}
+---------------------------------
+
+### Tiempo de carrera por categoría
+
+```{r}
+ggplot(CarreraLuz22M, aes(x = categoria, y = timerun/60 )) + geom_boxplot(aes(fill = categoria))+ labs(title = "", y= "tiempo (min)", x= "categorías") + scale_fill_brewer()
+```
+
+Column { data-width=200 }
+--------------------------
+
+### minimo1  {.value-box}
+```{r}
+valueBox(value = paste(round(min(CarreraLuz22M$timerun/60),2),"min"),
+         caption = "Tiempo mínimo de carrera Hombres",
+         icon = "ion-android-time",
+         color = "#0c4981")
+```
+
+### maximo1  {.value-box}
+```{r}
+valueBox(value = paste(round(max(CarreraLuz22M$timerun/60),2),"min"),
+         caption = "Tiempo máximo de carrera Hombres",
+         icon = "ion-android-time",
+         color = "#0c4981")
+```
+
+
+### promedio  {.value-box}
+```{r}
+valueBox(value = paste(round(mean(CarreraLuz22M$edad),2),"años"),
+         caption = "Edad Promedio Hombres",
+         icon = "ion-man",
+         color = "#0c4981")
+```
+
+-----------------
+
+### minimo2  {.value-box}
+```{r}
+valueBox(value = paste(round(min(CarreraLuz22M$edad),2),"años"),
+         caption = "Edad Mínima Hombres",
+         icon = "ion-man",
+         color = "#0c4981")
+```
+
+-----------------
+
+### maximo2  {.value-box}
+```{r}
+valueBox(value = paste(round(max(CarreraLuz22M$edad),2),"años"),
+         caption = "Edad Máxima Hombres",
+         icon = "ion-man",
+         color = "#0c4981")
+```
+
+# Mujeres
+
+Column {data.width=300 .tabset} 
+---------------------------------
+
+### Mujeres por categoria
+
+```{r}
+
+t1=table(CarreraLuz22F$categoria)
+piepercent<- round(100*t1/sum(t1), 1)
+pie(t1, col = rainbow(5))
+```
+
+### Mujeres por edad
+
+```{r}
+
+t1=table(CarreraLuz22F$edad)
+barplot(t1, col = rainbow(5), xlab = "edad", ylab = "frecuencia")
+```
+
+Column {data.width=500}
+---------------------------------
+
+### Tiempo de carrera por categoría
+
+```{r}
+ggplot(CarreraLuz22F, aes(x = categoria, y = timerun/60 )) + geom_boxplot(aes(fill = categoria))+ labs(title = "", y= "tiempo (min)", x= "categorías") + scale_fill_brewer()
+```
+
+Column { data-width=200 }
+--------------------------
+
+### minimo1  {.value-box}
+```{r}
+valueBox(value = paste(round(min(CarreraLuz22F$timerun/60),2),"min"),
+         caption = "Tiempo mínimo de carrera Mujeres",
+         icon = "ion-android-time",
+         color = "#0c4981")
+```
+
+### maximo1  {.value-box}
+```{r}
+valueBox(value = paste(round(max(CarreraLuz22F$timerun/60),2),"min"),
+         caption = "Tiempo máximo de carrera Mujeres",
+         icon = "ion-android-time",
+         color = "#0c4981")
+```
+
+
+### promedio  {.value-box}
+```{r}
+valueBox(value = paste(round(mean(CarreraLuz22F$edad),2),"años"),
+         caption = "Edad Promedio Mujeres",
+         icon = "ion-woman",
+         color = "#0c4981")
+```
+
+-----------------
+
+### minimo2  {.value-box}
+```{r}
+valueBox(value = paste(round(min(CarreraLuz22F$edad),2),"años"),
+         caption = "Edad Mínima Mujeres",
+         icon = "ion-woman",
+         color = "#0c4981")
+```
+
+-------------------------
+
+### maximo2  {.value-box}
+```{r}
+valueBox(value = paste(round(max(CarreraLuz22F$edad),2),"años"),
+         caption = "Edad Máxima Mujeres",
+         icon = "ion-woman",
+         color = "#0c4981")
+```
+
+# Comparación por sexo
+
+Column { data-width=500 .tabset }
+---------------------------------
+
+### Tiempos de carrera por edad
+
+```{r}
+paleta6=c("#447270", "#6B9493", "#F6E271", "#F6B916", "#F69312", "#BC6C25")
+p1=ggplot(CarreraLuz22, aes(y = timerun/60, x = edad, colour = sex))+
+  geom_point() +
+  # aes(color=paleta6)+
+  labs(title = "",
+       y= "tiempo (min)",
+       x= "edad")+ 
+  #facet_wrap(~ sex)
+  #facet_grid(vars(sex), scale="free")+
+  ylim(0,170)+
+  Theme2
+p1
+
+```
+
+### Tiempos de carrera por categoría
+
+```{r}
+paleta6=c("#447270", "#6B9493", "#F6E271", "#F6B916", "#F69312", "#BC6C25")
+p2=ggplot(CarreraLuz22, aes(y = timerun/60, x = categoria,colour = sex))+
+  # geom_point()+
+  geom_jitter(size=1, alpha=0.9) +
+  # aes(color=paleta6)+
+  labs(title = "",
+       y= "tiempo (min)",
+       x= "categoria")+ 
+  # facet_wrap(~ sex) +
+  #facet_grid(vars(sex), scale="free")+
+  ylim(0,170)+
+  Theme2
+p2
+
+```
+
+Column { data.width=300 .tabset } 
+---------------------------------
+
+### Número de atletas por categoría y sexo
+
+```{r}
+
+conteo <- table(CarreraLuz22$sex,CarreraLuz22$categoria)
+
+barplot(conteo, main="",  
+xlab="Categorías",
+col=c("#1111ee","#ff22ff"),
+legend = rownames(conteo),
+las=1, ylim = c(0,1200), 
+names.arg=c("Juvenil","Abierta","Veteranos A","Veteranos B","Veteranos C"))
+```
+
+
+### Distribución de tiempo Hombres y Mujeres
+
+```{r}
+
+boxplot(CarreraLuz22$timerun/60~CarreraLuz22$sex,
+main = "",
+ylab="tiempo (min)",
+xlab = "sexo", las=1,
+col=c("#1111ee","#ff22ff"))
+```
+
+Column { data-width=200 }
+--------------------------
+### volumen1  {.value-box}
+```{r}
+valueBox(value = paste(length(CarreraLuz22$timerun),"atletas"),
+         caption = "Número de participantes",
+         icon = "ion-ios-people",
+         color = "#0c4981")
+```
+
+### volumen2  {.value-box}
+```{r}
+valueBox(value = paste(length(CarreraLuz22M$timerun),"atletas"),
+         caption = "Número de hombres",
+         icon = "ion-male",
+         color = "#0c4981")
+```
+
+### volumen3  {.value-box}
+```{r}
+valueBox(value = paste(length(CarreraLuz22F$timerun),"atletas"),
+         caption = "Número de mujeres",
+         icon = "ion-female",
+         color = "#0c4981")
+```
+
+### promedio1  {.value-box}
+```{r}
+valueBox(value = paste(round(mean(CarreraLuz22M$timerun/60),2),"min"),
+         caption = "Tiempo promedio de carrera hombres",
+         icon = "ion-android-time",
+         color = "#0c4981")
+```
+
+### promedio2  {.value-box}
+```{r}
+valueBox(value = paste(round(mean(CarreraLuz22F$timerun/60),2),"min"),
+         caption = "Tiempo promedio de carrera mujeres",
+         icon = "ion-android-time",
+         color = "#0c4981")
+```
+
